@@ -17,6 +17,7 @@ data class Package(
     @Column(name = "tracking_id", unique = true)
     val trackingId: String,
 
+    @Enumerated(EnumType.STRING)
     val type: PackageType,
     val weight: Float,
 
