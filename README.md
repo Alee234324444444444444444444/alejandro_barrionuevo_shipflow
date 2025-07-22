@@ -8,6 +8,60 @@ Sistema de gestión de envíos de paquetes desarrollado con **Spring Boot** y **
 
 `Shipflow` es una sistema de envios que nos permite registrar paquetes con diferentes estados siguiendola regla del negocio y registra un historial completo de eventos por lo que ha pasado un paquete.
 
+## 🧱 Arquitectura del backend
+
+### 📂 Estructura del Proyecto Shipflow
+
+El backend sigue una arquitectura por capas con la siguiente estructura:
+
+```plaintext
+com/
+└── pucetec/
+    └── alejandro_barrionuevo_shipflow/
+        ├── controllers/
+        │   └── PackageController.kt                   # Controlador principal REST
+        │
+        ├── exceptions/                #EXCEPCIONES PARA LA LOGICA DE NEGOCIO
+        │   ├── BusinessRuleException.kt
+        │   ├── DescriptionTooLongException.kt
+        │   ├── InvalidCityException.kt
+        │   ├── InvalidStatusException.kt
+        │   ├── InvalidStatusTransitionException.kt
+        │   ├── InvalidTypeException.kt
+        │   └── PackageNotFoundException.kt
+        │
+        ├── mappers/
+        │   ├── PackageEventMapper.kt
+        │   └── PackageMapper.kt
+        │
+        ├── models/
+        │   ├── entities/
+        │   │   ├── BaseEntity.kt
+        │   │   ├── Package.kt
+        │   │   ├── PackageEvent.kt
+        │   │   ├── PackageType.kt
+        │   │   └── Status.kt
+        │   │
+        │   ├── requests/
+        │   │   ├── PackageRequest.kt
+        │   │   └── UpdateStatusRequest.kt
+        │   │
+        │   └── responses/
+        │       ├── PackageDetailResponse.kt
+        │       ├── PackageEventResponse.kt
+        │       ├── PackageResponse.kt
+        │       └── UpdateStatusResponse.kt
+        ├── repositories/
+        │   ├── PackageEventRepository.kt
+        │   └── PackageRepository.kt
+        ├── routes/                                      # Si defines rutas personalizadas aquí
+        ├── services/
+        │   └── PackageService.kt                        # Lógica de negocio
+        │
+        └── AlejandroBarrionuevoShipflowApplication.kt   # Clase principal de arranque
+
+```
+
 ### **Funcionalidades Principales del Proyecto:**
 
 **Registro de Envíos:**
