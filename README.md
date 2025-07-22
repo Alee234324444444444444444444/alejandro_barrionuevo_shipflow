@@ -1,8 +1,6 @@
 # Alejandro Barrionuevo - Shipflow
 # 📦 Shipflow - Sistema de Gestión de Envíos
 
-Sistema de gestión de envíos de paquetes desarrollado con **Spring Boot** y **Kotlin**, que ayuda a registrar y gestionar estados de paquetes.
----
 
 ## 📋 **Descripción General**
 
