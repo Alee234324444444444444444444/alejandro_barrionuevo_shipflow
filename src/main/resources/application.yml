@@ -1,0 +1,16 @@
+spring:
+  application:
+   name: alejandro_barrionuevo_shipflow
+
+
+  datasource:
+    url: jdbc:postgresql://localhost:6969/shipflow_db
+    driver-class-name: org.postgresql.Driver
+    username: admin
+    password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
