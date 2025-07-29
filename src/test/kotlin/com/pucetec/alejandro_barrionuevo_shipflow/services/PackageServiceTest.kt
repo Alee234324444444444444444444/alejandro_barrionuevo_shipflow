@@ -105,49 +105,6 @@ class PackageServiceTest {
     }
 
     @Test
-    fun should_return_package_by_tracking_id() {
-        val trackingId = "123"
-        val entity = Package(
-            trackingId = trackingId,
-            type = PackageType.FRAGILE,
-            weight = 1.2f,
-            description = "Florero de cerámica",
-            cityFrom = "Ambato",
-            cityTo = "Quito",
-            estimatedDeliveryDate = LocalDate.now().plusDays(3)
-        ).apply { id = 10L }
-
-        val response = PackageResponse(
-            id = 10L,
-            createdAt = entity.createdAt,
-            trackingId = trackingId,
-            type = "FRAGILE",
-            weight = 1.2f,
-            description = "Florero de cerámica",
-            cityFrom = "Ambato",
-            cityTo = "Quito",
-            status = "PENDING",
-            estimatedDeliveryDate = entity.estimatedDeliveryDate
-        )
-
-        `when`(packageRepository.findAll()).thenReturn(listOf(entity))
-        `when`(packageMapper.toResponse(entity)).thenReturn(response)
-
-        val result = packageService.getByTrackingId(trackingId)
-
-        assertEquals("Florero de cerámica", result.description)
-    }
-
-    @Test
-    fun should_throw_exception_when_tracking_id_not_found() {
-        `when`(packageRepository.findAll()).thenReturn(emptyList())
-
-        assertThrows<PackageNotFoundException> {
-            packageService.getByTrackingId("XYZ")
-        }
-    }
-
-    @Test
     fun should_update_status_successfully() {
         val trackingId = "200"
         val request = UpdateStatusRequest("IN_TRANSIT", "En camino")
@@ -173,7 +130,6 @@ class PackageServiceTest {
         assertEquals("IN_TRANSIT", result.newStatus)
     }
 
-
     @Test
     fun should_throw_exception_when_status_is_invalid() {
         val trackingId = "456"
@@ -197,7 +153,6 @@ class PackageServiceTest {
         }
     }
 
-
     @Test
     fun should_throw_exception_when_tracking_id_does_not_exist_on_update() {
         val trackingId = "000"
@@ -210,30 +165,6 @@ class PackageServiceTest {
         }
     }
 
-
-    @Test
-    fun should_return_package_detail_by_tracking_id() {
-        val trackingId = "ABC123"
-        val entity = Package(
-            trackingId = trackingId,
-            type = PackageType.FRAGILE,
-            weight = 1.0f,
-            description = "Jarrón",
-            cityFrom = "Quito",
-            cityTo = "Ambato",
-            estimatedDeliveryDate = LocalDate.now().plusDays(2)
-        ).apply { id = 99L }
-
-        val detailResponse = mock(PackageDetailResponse::class.java)
-
-        `when`(packageRepository.findAll()).thenReturn(listOf(entity))
-        `when`(packageMapper.toDetailResponse(entity, eventMapper)).thenReturn(detailResponse)
-
-        val result = packageService.getDetailByTrackingId(trackingId)
-
-        assertEquals(detailResponse, result)
-    }
-
     @Test
     fun should_throw_exception_when_package_detail_not_found() {
         `when`(packageRepository.findAll()).thenReturn(emptyList())
@@ -242,7 +173,6 @@ class PackageServiceTest {
             packageService.getDetailByTrackingId("NO_EXISTE")
         }
     }
-
 
     @Test
     fun should_throw_exception_when_status_transition_is_invalid() {
@@ -264,31 +194,6 @@ class PackageServiceTest {
         `when`(packageRepository.findAll()).thenReturn(listOf(entity))
 
         assertThrows<InvalidStatusTransitionException> {
-            packageService.updateStatusPackage(trackingId, request)
-        }
-    }
-
-
-    @Test
-    fun should_throw_business_rule_exception_when_delivered_without_in_transit() {
-        val trackingId = "TRK124"
-        val request = UpdateStatusRequest("DELIVERED", "Entregado")
-
-        val entity = Package(
-            trackingId = trackingId,
-            type = PackageType.FRAGILE,
-            weight = 5.0f,
-            description = "Cámara",
-            cityFrom = "Guayaquil",
-            cityTo = "Loja",
-            status = Status.IN_TRANSIT,
-            estimatedDeliveryDate = LocalDate.now().plusDays(2),
-            events = emptyList()
-        ).apply { id = 202L }
-
-        `when`(packageRepository.findAll()).thenReturn(listOf(entity))
-
-        assertThrows<BusinessRuleException> {
             packageService.updateStatusPackage(trackingId, request)
         }
     }
@@ -345,7 +250,6 @@ class PackageServiceTest {
         assertEquals("CANCELLED", result.newStatus)
     }
 
-
     @Test
     fun should_throw_exception_when_transition_from_delivered() {
         val trackingId = "DEL123"
@@ -394,7 +298,6 @@ class PackageServiceTest {
         }
     }
 
-
     @Test
     fun should_update_from_in_transit_to_cancelled() {
         val trackingId = "INT123"
@@ -421,7 +324,6 @@ class PackageServiceTest {
         assertEquals("CANCELLED", result.newStatus)
     }
 
-
     @Test
     fun should_update_from_in_transit_to_on_hold() {
         val trackingId = "ONHOLD123"
@@ -447,7 +349,6 @@ class PackageServiceTest {
 
         assertEquals("ON_HOLD", result.newStatus)
     }
-
 
     @Test
     fun should_update_to_delivered_when_in_transit_event_exists() {
@@ -483,7 +384,6 @@ class PackageServiceTest {
 
         assertEquals("DELIVERED", result.newStatus)
     }
-
 
     @Test
     fun should_return_all_packages() {
@@ -521,7 +421,6 @@ class PackageServiceTest {
         assertEquals("TRK001", result.first().trackingId)
     }
 
-
     @Test
     fun should_throw_exception_when_trying_to_return_to_pending_from_in_transit() {
         val trackingId = "TRK789"
@@ -546,30 +445,32 @@ class PackageServiceTest {
         }
     }
 
-
     @Test
-    fun should_throw_exception_when_tracking_id_does_not_match_any_package() {
-        val trackingId = "TRK404"
-        val request = UpdateStatusRequest("IN_TRANSIT", "Cambio de estado")
+    fun should_throw_exception_when_tracking_id_is_missing_or_invalid() {
+        val trackingId = "XYZ"
+        val request = UpdateStatusRequest("IN_TRANSIT", "Actualización")
 
         val otherPackage = Package(
-            trackingId = "OTRO",
-            type = PackageType.FRAGILE,
-            weight = 2.0f,
-            description = "Otro paquete",
-            cityFrom = "Quito",
-            cityTo = "Guayaquil",
+            trackingId = "OTHER",
+            type = PackageType.DOCUMENT,
+            weight = 1.0f,
+            description = "Otro",
+            cityFrom = "A",
+            cityTo = "B",
             status = Status.PENDING,
-            estimatedDeliveryDate = LocalDate.now().plusDays(2),
-            events = emptyList()
+            estimatedDeliveryDate = LocalDate.now()
         )
-        `when`(packageRepository.findAll()).thenReturn(listOf(otherPackage))
 
+        `when`(packageRepository.findAll()).thenReturn(emptyList())
+        assertThrows<PackageNotFoundException> {
+            packageService.getByTrackingId(trackingId)
+        }
+
+        `when`(packageRepository.findAll()).thenReturn(listOf(otherPackage))
         assertThrows<PackageNotFoundException> {
             packageService.updateStatusPackage(trackingId, request)
         }
     }
-
 
     @Test
     fun should_throw_business_rule_exception_when_no_in_transit_event_before_delivered() {
@@ -600,7 +501,6 @@ class PackageServiceTest {
             packageService.updateStatusPackage(trackingId, request)
         }
     }
-
 
     @Test
     fun should_return_package_when_tracking_id_matches() {
@@ -656,7 +556,6 @@ class PackageServiceTest {
         assertEquals(expectedResponse.type, result.type)
         assertEquals(expectedResponse.status, result.status)
     }
-
 
     @Test
     fun should_return_package_detail_when_tracking_id_matches() {
@@ -755,17 +654,8 @@ class PackageServiceTest {
         )
 
         val savedEntity = mappedEntity.copy().apply { id = 99L }
-
-        val initialEventRequest = UpdateStatusRequest(
-            status = "PENDING",
-            comment = "Package registered and pending processing"
-        )
-
-        val mappedEvent = PackageEvent(
-            status = Status.PENDING,
-            packageEntity = savedEntity
-        )
-
+        val initialEventRequest = UpdateStatusRequest(status = "PENDING", comment = "Package registered and pending processing")
+        val mappedEvent = PackageEvent(status = Status.PENDING, packageEntity = savedEntity)
         val expectedResponse = PackageResponse(
             id = 99L,
             createdAt = savedEntity.createdAt,
